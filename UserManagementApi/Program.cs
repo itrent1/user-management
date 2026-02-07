@@ -8,30 +8,32 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReact", policy =>
-        policy.WithOrigins("http://localhost:5173")
+    options.AddPolicy("AllowAll", policy =>
+        policy.AllowAnyOrigin() 
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials()
     );
 });
 
 var app = builder.Build();
 
-app.UseCors("AllowReact");
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+}
+
+app.UseCors("AllowAll");
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
