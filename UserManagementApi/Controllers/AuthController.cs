@@ -46,8 +46,7 @@ public class AuthController : ControllerBase
         {
             await _db.SaveChangesAsync();
 
-            var confirmLink = $"https://localhost:7278/auth/confirm?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(confirmationToken)}";
-
+            var confirmLink = $"{Request.Scheme}://{Request.Host}/auth/confirm?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(confirmationToken)}";
             return Ok(new
             {
                 message = "Registered",
@@ -135,4 +134,5 @@ public class AuthController : ControllerBase
 
 public record RegisterDto(string Name, string Email, string Password);
 public record LoginDto(string Email, string Password);
+
 public record ConfirmDto(string Email, string Token);
